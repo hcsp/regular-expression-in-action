@@ -21,7 +21,7 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    private static final Pattern gcPattern =
+    private static final Pattern GC_PATTERN =
             Pattern.compile("PSYoungGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).+?(\\d+)K->(\\d+)K\\((\\d+)K\\)" +
                     ".+?user=(\\d\\.\\d{2}) sys=(\\d\\.\\d{2}),\\s+real=(\\d\\.\\d{2})");
 
@@ -35,7 +35,7 @@ public class GCLogAnalyzer {
         Matcher matcher;
 
         for (String line : lines) {
-            matcher = gcPattern.matcher(line);
+            matcher = GC_PATTERN.matcher(line);
             while (matcher.find()) {
                 GCActivity gCActivity = convertToGcActivity(matcher);
                 list.add(gCActivity);
