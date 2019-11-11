@@ -1,7 +1,12 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,11 +21,57 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) {
-        return null;
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+        List<GCActivity> activities = new ArrayList<>();
+        List<String> lines = Files.readAllLines(gcLog.toPath());
+        Pattern pattern1 = Pattern.compile("(\\w+)K->(\\w+)K\\((\\w+)K\\)");
+        Pattern pattern2 = Pattern.compile("\\w+=(\\d(\\.\\d+)?)");
+        for (String line : lines) {
+            Matcher matcher1 = pattern1.matcher(line);
+            Integer youngGenBefore = null;
+            Integer youngGenAfter = null;
+            Integer youngGenTotal = null;
+            Integer heapBefore = null;
+            Integer heapAfter = null;
+            Integer heapTotal = null;
+            Double user = null;
+            Double sys = null;
+            Double real = null;
+            if (matcher1.find()) {
+                youngGenBefore = Integer.parseInt(matcher1.group(1));
+                youngGenAfter = Integer.parseInt(matcher1.group(2));
+                youngGenTotal = Integer.parseInt(matcher1.group(3));
+            }
+            if (matcher1.find()) {
+                heapBefore = Integer.parseInt(matcher1.group(1));
+                heapAfter = Integer.parseInt(matcher1.group(2));
+                heapTotal = Integer.parseInt(matcher1.group(3));
+            }
+            Matcher matcher2 = pattern2.matcher(line);
+            if (matcher2.find()) {
+                user = Double.parseDouble(matcher2.group(1));
+            }
+            if (matcher2.find()) {
+                sys = Double.parseDouble(matcher2.group(1));
+            }
+            if (matcher2.find()) {
+                real = Double.parseDouble(matcher2.group(1));
+            }
+            GCActivity gcActivity = null;
+            if (youngGenBefore != null && youngGenAfter != null && youngGenTotal != null &&
+                    heapBefore != null && heapAfter != null && heapTotal != null &&
+                    user != null && sys != null && real != null) {
+                gcActivity = new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal,
+                        heapBefore, heapAfter, heapTotal, user, sys, real);
+            }
+            if (gcActivity != null) {
+                activities.add(gcActivity);
+            }
+        }
+        return activities;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
