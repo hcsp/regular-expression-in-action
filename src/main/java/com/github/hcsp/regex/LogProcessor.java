@@ -14,8 +14,10 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
+    private static final String TIMESTAMP_REGEX = "(?m)^\\[.*?\\]";
+
     public static String process(String log) {
-        return null;
+        return log.replaceAll(TIMESTAMP_REGEX, "");
     }
 
     public static void main(String[] args) {
@@ -23,7 +25,6 @@ public class LogProcessor {
                 "[2019-08-01 21:24:41] bt3102 (11m:21s)\n"
                         + "[2019-08-01 21:24:42] TeamCity server version is 2019.1.1 (build 66192)\n"
                         + "[2019-08-01 21:24:43] Collecting changes in 2 VCS roots (22s)\n";
-
         System.out.println(process(str));
     }
 }
