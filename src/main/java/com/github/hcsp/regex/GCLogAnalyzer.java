@@ -1,9 +1,22 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
+    private static String regex = "\\[\\w*: (\\d*)K->(\\d*)K\\((\\d*)K\\)]" +
+            "(?: \\[\\w*: \\d*K->\\d*K\\(\\d*K\\)])?" +
+            " (\\d*)K->(\\d*)K\\((\\d*)K\\)(?:, \\[\\w*:.{10,50}\\)])?," +
+            " \\d.\\d*.{7}" +
+            "\\[\\w*: user=(\\d.\\d*) sys=(\\d.\\d*), real=(\\d.\\d*) \\w*]";
+    private static Pattern pattern = Pattern.compile(regex);
+
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
@@ -17,7 +30,32 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        List<GCActivity> gcActivities = new ArrayList<>();
+        try {
+            byte[] bytes = Files.readAllBytes(gcLog.toPath());
+            String log = new String(bytes, Charset.defaultCharset());
+            String[] rows = log.split("\\n");
+            for (String row : rows) {
+                Matcher matcher = pattern.matcher(row);
+                if (matcher.find()) {
+                    int youngBefore = Integer.valueOf(matcher.group(1));
+                    int youngAfter = Integer.valueOf(matcher.group(2));
+                    int youngTotal = Integer.valueOf(matcher.group(3));
+                    int heapBefore = Integer.valueOf(matcher.group(4));
+                    int heapAfter = Integer.valueOf(matcher.group(5));
+                    int heapTotal = Integer.valueOf(matcher.group(6));
+                    double user = Double.valueOf(matcher.group(7));
+                    double sys = Double.valueOf(matcher.group(8));
+                    double real = Double.valueOf(matcher.group(9));
+                    GCActivity activity = new GCActivity(youngBefore, youngAfter, youngTotal, heapBefore, heapAfter, heapTotal, user, sys, real);
+                    gcActivities.add(activity);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return gcActivities;
     }
 
     public static void main(String[] args) {
