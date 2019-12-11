@@ -1,7 +1,13 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,8 +22,35 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
+
+    private static final Pattern PATTERN = Pattern.compile("(\\d+)K->(\\d+)K\\((\\d+)K\\).*?(\\d+)K->(\\d+)K\\((\\d+)K\\).*user=([\\d.]+)\\ssys=([\\d.]+).*real=([\\d.]+)");
+
+
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        try {
+            List<String> reads = Files.readAllLines(gcLog.toPath());
+            return reads.stream().map(line -> {
+                Matcher matcher = PATTERN.matcher(line);
+                GCActivity gc = null;
+                while (matcher.find()) {
+                    int a = Integer.parseInt(matcher.group(1));
+                    int b = Integer.parseInt(matcher.group(2));
+                    int c = Integer.parseInt(matcher.group(3));
+                    int d = Integer.parseInt(matcher.group(4));
+                    int e = Integer.parseInt(matcher.group(5));
+                    int f = Integer.parseInt(matcher.group(6));
+                    double u = Double.parseDouble(matcher.group(7));
+                    double s = Double.parseDouble(matcher.group(8));
+                    double r = Double.parseDouble(matcher.group(9));
+                    gc = new GCActivity(a, b, c, d, e, f, u, s, r);
+                }
+                return gc;
+            }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        } catch (IOException e) {
+            System.out.println("IO 异常");
+            throw new RuntimeException(e);
+        }
     }
 
     public static void main(String[] args) {
