@@ -38,12 +38,6 @@ public class GCLogAnalyzer {
                 InputStream inputStream = new FileInputStream(gcLog);
                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-//            br.lines().forEach(str -> {
-//                GCActivity gcActivity = getGCActivityObjectFromOneLineOfGCLog(str);
-//                if (gcActivity != null) {
-//                    list.add(gcActivity);
-//                }
-//            });
             return br.lines()
                     .map(GC_LOG_Pattern::matcher)
                     .filter(Matcher::find)
