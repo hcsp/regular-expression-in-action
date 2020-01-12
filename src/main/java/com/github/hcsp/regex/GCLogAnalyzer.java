@@ -6,17 +6,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
-    private static final String GC_LOG_PATTERN = "\\[PSYoungGen: (\\d*)K->(\\d*)K\\((\\d*)K\\)] " +
+    private static final String GC_LOG_Regex = "\\[PSYoungGen: (\\d*)K->(\\d*)K\\((\\d*)K\\)] " +
             "(?:\\[ParOldGen:.*?\\)] )?" +
             "(\\d*)K->(\\d*)K\\((\\d*)K\\), " +
             ".*? " +
             "\\[Times: user=(\\d\\.\\d*) sys=(\\d\\.\\d*), real=(\\d\\.\\d*)";
+
+    private static final Pattern GC_LOG_Pattern = Pattern.compile(GC_LOG_Regex);
 
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
@@ -31,40 +33,39 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        List<GCActivity> list = new ArrayList<>();
 
         try (
                 InputStream inputStream = new FileInputStream(gcLog);
                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            br.lines().forEach(str -> {
-                GCActivity gcActivity = getGCActivityObjectFromOneLineOfGCLog(str);
-                if (gcActivity != null) {
-                    list.add(gcActivity);
-                }
-            });
+//            br.lines().forEach(str -> {
+//                GCActivity gcActivity = getGCActivityObjectFromOneLineOfGCLog(str);
+//                if (gcActivity != null) {
+//                    list.add(gcActivity);
+//                }
+//            });
+            return br.lines()
+                    .map(GC_LOG_Pattern::matcher)
+                    .filter(Matcher::find)
+                    .map(GCLogAnalyzer::getGCActivityInstance)
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return list;
+
     }
 
-    public static GCActivity getGCActivityObjectFromOneLineOfGCLog(String str) {
-        Matcher matcher = Pattern.compile(GC_LOG_PATTERN).matcher(str);
-        if (matcher.find()) {
-            int youngBefore = Integer.parseInt(matcher.group(1));
-            int youngAfter = Integer.parseInt(matcher.group(2));
-            int youngTotal = Integer.parseInt(matcher.group(3));
-            int heapBefore = Integer.parseInt(matcher.group(4));
-            int heapAfter = Integer.parseInt(matcher.group(5));
-            int heapTotal = Integer.parseInt(matcher.group(6));
-            double user = Double.parseDouble(matcher.group(7));
-            double sys = Double.parseDouble(matcher.group(8));
-            double real = Double.parseDouble(matcher.group(9));
-            return new GCActivity(youngBefore, youngAfter, youngTotal, heapBefore, heapAfter, heapTotal, user, sys, real);
-        } else {
-            return null;
-        }
+    public static GCActivity getGCActivityInstance(Matcher matcher) {
+        int youngBefore = Integer.parseInt(matcher.group(1));
+        int youngAfter = Integer.parseInt(matcher.group(2));
+        int youngTotal = Integer.parseInt(matcher.group(3));
+        int heapBefore = Integer.parseInt(matcher.group(4));
+        int heapAfter = Integer.parseInt(matcher.group(5));
+        int heapTotal = Integer.parseInt(matcher.group(6));
+        double user = Double.parseDouble(matcher.group(7));
+        double sys = Double.parseDouble(matcher.group(8));
+        double real = Double.parseDouble(matcher.group(9));
+        return new GCActivity(youngBefore, youngAfter, youngTotal, heapBefore, heapAfter, heapTotal, user, sys, real);
     }
 
     public static void main(String[] args) {
