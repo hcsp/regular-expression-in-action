@@ -9,6 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
+    static final Pattern logPattern = Pattern.compile("PSYoungGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).+?(\\d+)K->(\\d+)K\\((\\d+)K\\)" +
+            ".+?user=(\\d\\.\\d{2}) sys=(\\d\\.\\d{2}),\\s+real=(\\d\\.\\d{2})");
+
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
@@ -22,8 +25,7 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) throws IOException {
-        Pattern logPattern = Pattern.compile("PSYoungGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).+?(\\d+)K->(\\d+)K\\((\\d+)K\\)" +
-                ".+?user=(\\d\\.\\d{2}) sys=(\\d\\.\\d{2}),\\s+real=(\\d\\.\\d{2})");
+
         List<GCActivity> gcList = new ArrayList<>();
         List<String> lines = Files.readAllLines(gcLog.toPath());
         for (String line : lines) {
