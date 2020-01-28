@@ -1,9 +1,17 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
+    static final Pattern logPattern = Pattern.compile("PSYoungGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).+?(\\d+)K->(\\d+)K\\((\\d+)K\\)" +
+            ".+?user=(\\d\\.\\d{2}) sys=(\\d\\.\\d{2}),\\s+real=(\\d\\.\\d{2})");
+
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
@@ -16,13 +24,42 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) {
-        return null;
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+
+        List<GCActivity> gcList = new ArrayList<>();
+        List<String> lines = Files.readAllLines(gcLog.toPath());
+        for (String line : lines) {
+            Matcher logMatcher = logPattern.matcher(line);
+            while (logMatcher.find()) {
+
+                int youngBefore = Integer.parseInt(logMatcher.group(1));
+                int youngAfter = Integer.parseInt(logMatcher.group(2));
+                int youngTotal = Integer.parseInt(logMatcher.group(3));
+                int JVMBefore = Integer.parseInt(logMatcher.group(4));
+                int JVMAfter = Integer.parseInt(logMatcher.group(5));
+                int JVMTotal = Integer.parseInt(logMatcher.group(6));
+                double userTime = Double.parseDouble(logMatcher.group(7));
+                double sysTime = Double.parseDouble(logMatcher.group(8));
+                double realTime = Double.parseDouble(logMatcher.group(9));
+
+                GCActivity gcActivity = new GCActivity(youngBefore, youngAfter, youngTotal, JVMBefore, JVMAfter, JVMTotal, userTime, sysTime, realTime);
+
+                gcList.add(gcActivity);
+            }
+        }
+
+        return gcList;
     }
 
     public static void main(String[] args) {
-        List<GCActivity> activities = parse(new File("gc.log"));
-        activities.forEach(System.out::println);
+        List<GCActivity> activities = null;
+        try {
+            activities = parse(new File("gc.log"));
+            activities.forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static class GCActivity {
