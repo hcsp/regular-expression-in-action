@@ -44,7 +44,7 @@ public class GCLogAnalyzer {
 
         });
 
-        if(patternCompiler==null){
+        if (patternCompiler==null){
             patternCompiler = Pattern.compile(pattern, Pattern.MULTILINE);
         }
 

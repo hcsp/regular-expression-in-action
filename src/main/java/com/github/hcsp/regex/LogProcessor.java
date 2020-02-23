@@ -16,9 +16,13 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
+    public static Pattern patternCompiler;
     public static String process(String log) {
         String pattern = "^\n?\\[[\\d|-]{10}\\s[\\d|:]{8}\\]";
-        return Pattern.compile(pattern, Pattern.MULTILINE).matcher(log).replaceAll("");
+        if (patternCompiler==null){
+            patternCompiler = Pattern.compile(pattern, Pattern.MULTILINE);
+        }
+        return patternCompiler.matcher(log).replaceAll("");
     }
 
     public static void main(String[] args) {
