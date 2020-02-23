@@ -30,6 +30,8 @@ public class GCLogAnalyzer {
         return parse(content);
     }
 
+    private static Pattern patternCompiler;
+
     private static List<GCActivity> parse(String content)throws Exception{
         // 命名捕获组的语法格式：(?<自定义名>expr)
         String pattern = String.join("", new String[]{
@@ -42,7 +44,11 @@ public class GCLogAnalyzer {
 
         });
 
-        Matcher matcher = Pattern.compile(pattern, Pattern.MULTILINE).matcher(content);
+        if(patternCompiler==null){
+            patternCompiler = Pattern.compile(pattern, Pattern.MULTILINE);
+        }
+
+        Matcher matcher = patternCompiler.matcher(content);
         List<GCActivity> list = new ArrayList<>();
         while (matcher.find()){
 
