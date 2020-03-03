@@ -1,13 +1,7 @@
 package com.github.hcsp.regex;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -22,33 +16,11 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    private static final String gcRegex = "(\\d+)K->(\\d+)K\\((\\d+)K\\).* (\\d+)K->(\\d+)K\\((\\d+)K\\).*\\[Times: user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)";
-    private static final Pattern gcPattern = Pattern.compile(gcRegex);
-    public static List<GCActivity> parse(File gcLog) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(gcLog));
-
-
-        List<GCActivity> gcActivities = new ArrayList<>();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            Matcher matcher=gcPattern.matcher(line);
-            while (matcher.find()){
-                GCActivity gcActivity = new GCActivity(Integer.valueOf(matcher.group(1)),
-                        Integer.valueOf(matcher.group(2)),
-                        Integer.valueOf(matcher.group(3)),
-                        Integer.valueOf(matcher.group(4)),
-                        Integer.valueOf(matcher.group(5)),
-                        Integer.valueOf(matcher.group(6)),
-                        Double.valueOf(matcher.group(7)),
-                        Double.valueOf(matcher.group(8)),
-                        Double.valueOf(matcher.group(9)));
-                gcActivities.add(gcActivity);
-            }
-
-        }return gcActivities;
+    public static List<GCActivity> parse(File gcLog) {
+        return null;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
