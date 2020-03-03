@@ -1,5 +1,9 @@
 package com.github.hcsp.regex;
 
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class LogProcessor {
     // 传入日志字符串，将每行开头的时间戳删除
     // 返回删除时间戳后的字符串
@@ -14,8 +18,13 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
+    private static final String regex="\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\]";
     public static String process(String log) {
-        return null;
+        String[] split = log.split("\n");
+        String collect = Arrays.stream(split)
+                .map(s -> s.replaceFirst(regex, ""))
+                .collect(Collectors.joining("\n"));
+        return collect;
     }
 
     public static void main(String[] args) {
