@@ -18,4 +18,4 @@ public class LogProcessorTest {
                 result[1].trim());
         Assertions.assertEquals("Collecting changes in 2 VCS roots (22s)", result[2].trim());
     }
-}
+            }
