@@ -15,7 +15,15 @@ public class LogProcessor {
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
     public static String process(String log) {
-        return null;
+        final String[] lines = log.split("\\n");
+        StringBuilder result = new StringBuilder();
+        for (String line : lines
+        ) {
+//            final String s = line.split("\\[\\d{4}(-\\d{2}){2} \\d{2}(:\\d{2}){2}]")[1];
+            final String s = line.replaceFirst("\\[\\d{4}(-\\d{2}){2} \\d{2}(:\\d{2}){2}]", "");
+            result.append(s + "\n");
+        }
+        return result.toString();
     }
 
     public static void main(String[] args) {
