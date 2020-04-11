@@ -1,7 +1,13 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,8 +22,37 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
+    private static final Pattern GC_PATTREN =
+            Pattern.compile("PSYoungGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).+?(\\d+)K->(\\d+)K\\((\\d+)K\\)" +
+                    ".+?user=(\\d\\.\\d{2}) sys=(\\d\\.\\d{2}),\\s+real=(\\d\\.\\d{2})");
+
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        List<String> lines = null;
+        try {
+            lines = Files.readAllLines(gcLog.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return lines.stream().map(GCLogAnalyzer::createGCActivity).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    static GCActivity createGCActivity(String line) {
+        Matcher matcher = GC_PATTREN.matcher(line);
+        if (matcher.find()) {
+            return new GCActivity(
+                    Integer.parseInt(matcher.group(1)),
+                    Integer.parseInt(matcher.group(2)),
+                    Integer.parseInt(matcher.group(3)),
+                    Integer.parseInt(matcher.group(4)),
+                    Integer.parseInt(matcher.group(5)),
+                    Integer.parseInt(matcher.group(6)),
+                    Double.parseDouble(matcher.group(7)),
+                    Double.parseDouble(matcher.group(8)),
+                    Double.parseDouble(matcher.group(9))
+            );
+        } else {
+            return null;
+        }
     }
 
     public static void main(String[] args) {
