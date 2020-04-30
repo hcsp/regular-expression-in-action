@@ -1,6 +1,5 @@
 package com.github.hcsp.regex;
 
-
 public class PhoneNumberMatcher {
     // 请编写一个函数，判断一个字符串是不是合法的固定电话号码
     // 合法的固定电话号码为：区号-号码
@@ -16,6 +15,6 @@ public class PhoneNumberMatcher {
     // 123-45678901 区号必须以0开头
     // 021-1234567 三位区号后面只能跟八位电话号码
     public static boolean isPhoneNumber(String str) {
-        return str.matches("0\\d{3}-[1,9]\\d{6,7}|0\\d{2}-[1,9]\\d{7}");
+        return false;
     }
 }
