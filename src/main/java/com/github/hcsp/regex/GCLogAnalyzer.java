@@ -1,12 +1,7 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -21,33 +16,8 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    private static final Pattern gcPattern = Pattern.compile("PSYoungGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\)].*\\s(\\d+)K->(\\d+|\\d+)K\\((\\d+)K\\).*user=(\\d\\.\\d\\d).*sys=(\\d\\.\\d\\d).*real=(\\d\\.\\d\\d)");
-
     public static List<GCActivity> parse(File gcLog) {
-        List<GCActivity> list = new ArrayList<>();
-        try {
-            List<String> lines = Files.readAllLines(gcLog.toPath());
-            for (String line : lines) {
-                Matcher matcher = gcPattern.matcher(line);
-                while (matcher.find()) {
-                    GCActivity gcActivity = new GCActivity(
-                            Integer.valueOf(matcher.group(1)),
-                            Integer.valueOf(matcher.group(2)),
-                            Integer.valueOf(matcher.group(3)),
-                            Integer.valueOf(matcher.group(4)),
-                            Integer.valueOf(matcher.group(5)),
-                            Integer.valueOf(matcher.group(6)),
-                            Double.valueOf(matcher.group(7)),
-                            Double.valueOf(matcher.group(8)),
-                            Double.valueOf(matcher.group(9)
-                            ));
-                    list.add(gcActivity);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return list;
+        return null;
     }
 
     public static void main(String[] args) {
