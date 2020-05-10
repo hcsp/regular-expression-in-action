@@ -25,7 +25,7 @@ public class GCLogAnalyzer {
         List<GCActivity> result = new ArrayList<>();
         try {
             final List<String> lines = Files.readAllLines(gcLog.toPath());
-            Pattern GCLogPattern = Pattern.compile("(\\d+)K->(\\d+)K.(\\d+)K.*\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).*user=([\\d\\.]+).sys=([\\d\\.]+).+real=([\\d\\.]+)");
+            Pattern GCLogPattern = Pattern.compile("(\\d+)K->(\\d+)K.(\\d+)K.+?(\\d+)K->(\\d+)K\\((\\d+)K\\).*user=([\\d\\.]+).sys=([\\d\\.]+).+real=([\\d\\.]+)");
             for (String line : lines) {
                 final Matcher matcher = GCLogPattern.matcher(line);
                 if (matcher.find()) {
