@@ -14,10 +14,8 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
-    private static final String REGEX = "\n\\[\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}\\]\\s";
-
     public static String process(String log) {
-        return ("\n" + log).replaceAll(REGEX, "\n").substring(1);
+        return null;
     }
 
     public static void main(String[] args) {
