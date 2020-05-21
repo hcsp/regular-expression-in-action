@@ -2,7 +2,6 @@ package com.github.hcsp.regex;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -36,29 +35,30 @@ public class GCLogAnalyzer {
             throw new RuntimeException(e);
         }
     }
-        private static GCActivity getGCActivity(Matcher matcher) {
-            int youngGenBefore = Integer.valueOf(matcher.group(1));
 
-            int youngGenAfter = Integer.valueOf(matcher.group(2));
+    private static GCActivity getGCActivity(Matcher matcher) {
+        int youngGenBefore = Integer.valueOf(matcher.group(1));
 
-            int youngGenTotal = Integer.valueOf(matcher.group(3));
+        int youngGenAfter = Integer.valueOf(matcher.group(2));
 
-            int heapBefore = Integer.valueOf(matcher.group(4));
+        int youngGenTotal = Integer.valueOf(matcher.group(3));
 
-            int heapAfter = Integer.valueOf(matcher.group(5));
+        int heapBefore = Integer.valueOf(matcher.group(4));
 
-            int heapTotal = Integer.valueOf(matcher.group(6));
+        int heapAfter = Integer.valueOf(matcher.group(5));
 
-            double user = Double.valueOf(matcher.group(7));
+        int heapTotal = Integer.valueOf(matcher.group(6));
 
-            double sys = Double.valueOf(matcher.group(8));
+        double user = Double.valueOf(matcher.group(7));
 
-            double real = Double.valueOf(matcher.group(9));
-            return new GCActivity(
-                    youngGenBefore, youngGenAfter, youngGenTotal,
-                    heapBefore, heapAfter, heapTotal,
-                    user, sys, real);
-        }
+        double sys = Double.valueOf(matcher.group(8));
+
+        double real = Double.valueOf(matcher.group(9));
+        return new GCActivity(
+                youngGenBefore, youngGenAfter, youngGenTotal,
+                heapBefore, heapAfter, heapTotal,
+                user, sys, real);
+    }
 
 
     public static void main(String[] args) {
