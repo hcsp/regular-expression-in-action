@@ -1,7 +1,13 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Parameter;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -17,8 +23,43 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        Pattern telPattern = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\)\\] (\\d+)K->(\\d+)K\\((\\d+)K\\).*user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)");
+        try {
+            final List<String> lines = Files.readAllLines(gcLog.toPath());
+            return lines.stream()
+                    .map(telPattern::matcher)
+                    .filter(Matcher::find)
+                    .map(GCLogAnalyzer::getGCActivity)
+                    .collect(Collectors.toList());
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+        private static GCActivity getGCActivity(Matcher matcher) {
+            int youngGenBefore = Integer.valueOf(matcher.group(1));
+
+            int youngGenAfter = Integer.valueOf(matcher.group(2));
+
+            int youngGenTotal = Integer.valueOf(matcher.group(3));
+
+            int heapBefore = Integer.valueOf(matcher.group(4));
+
+            int heapAfter = Integer.valueOf(matcher.group(5));
+
+            int heapTotal = Integer.valueOf(matcher.group(6));
+
+            double user = Double.valueOf(matcher.group(7));
+
+            double sys = Double.valueOf(matcher.group(8));
+
+            double real = Double.valueOf(matcher.group(9));
+            return new GCActivity(
+                    youngGenBefore, youngGenAfter, youngGenTotal,
+                    heapBefore, heapAfter, heapTotal,
+                    user, sys, real);
+        }
+
 
     public static void main(String[] args) {
         List<GCActivity> activities = parse(new File("gc.log"));
