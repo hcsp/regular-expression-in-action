@@ -22,7 +22,7 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        Pattern telPattern = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\)\\] (\\d+)K->(\\d+)K\\((\\d+)K\\).*user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)");
+        Pattern telPattern = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\).*\\]\\s(\\d+)K->(\\d+)K\\((\\d+)K\\),.+user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)");
         try {
             final List<String> lines = Files.readAllLines(gcLog.toPath());
             return lines.stream()
