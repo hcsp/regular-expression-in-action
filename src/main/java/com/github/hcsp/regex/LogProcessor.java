@@ -14,18 +14,14 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
-
-    // 使用正则修饰符 (?m)，m 代表把目标字符串按照多行来处理，因此可以使用 ^ 分别匹配若干个开头
-    public static final String TIMESTAMP_REGEX = "(?m)^\\[\\d{4}(-\\d{2}){2}\\s\\d{2}(:\\d{2}){2}]";
-
     public static String process(String log) {
-        return log.replaceAll(TIMESTAMP_REGEX, "");
+        return null;
     }
 
     public static void main(String[] args) {
         String str =
                 "[2019-08-01 21:24:41] bt3102 (11m:21s)\n"
-                        + "[2019-08-01 21:24:42] TeamCity server [2019-08-01 21:24:42] version is 2019.1.1 (build 66192)\n"
+                        + "[2019-08-01 21:24:42] TeamCity server version is 2019.1.1 (build 66192)\n"
                         + "[2019-08-01 21:24:43] Collecting changes in 2 VCS roots (22s)\n";
 
         System.out.println(process(str));
