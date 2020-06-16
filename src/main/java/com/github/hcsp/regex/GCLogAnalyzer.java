@@ -21,10 +21,11 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
+    private static Pattern pattern = Pattern.compile("PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\)|(\\d+)K->(\\d+)K\\((\\d+)K\\),|=(\\d+\\.\\d+)");
+
     public static List<GCActivity> parse(File gcLog) throws IOException {
         List<String> lines = Files.readAllLines(gcLog.toPath());
         List<GCActivity> gcActivities = new ArrayList<>();
-        Pattern pattern = Pattern.compile("PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\)|(\\d+)K->(\\d+)K\\((\\d+)K\\),|=(\\d+\\.\\d+)");
         for (String line : lines) {
             List<String> list = new ArrayList<>();
             Matcher matcher = pattern.matcher(line);
