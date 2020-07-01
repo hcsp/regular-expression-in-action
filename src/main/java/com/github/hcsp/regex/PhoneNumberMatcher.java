@@ -1,7 +1,5 @@
 package com.github.hcsp.regex;
 
-import java.util.regex.Pattern;
-
 public class PhoneNumberMatcher {
     // 请编写一个函数，判断一个字符串是不是合法的固定电话号码
     // 合法的固定电话号码为：区号-号码
