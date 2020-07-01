@@ -1,7 +1,12 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,11 +21,45 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) {
-        return null;
+    private static final Pattern pattern = Pattern.compile("PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\)|(\\d+)K->(\\d+)K\\((\\d+)K\\),|=(\\d+\\.\\d+)");
+
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+        List<String> lines = Files.readAllLines(gcLog.toPath());
+        List<GCActivity> gcActivities = new ArrayList<>();
+        for (String line : lines) {
+            List<String> list = new ArrayList<>();
+            Matcher matcher = pattern.matcher(line);
+            while (matcher.find()) {
+                addMatchGroupToList(matcher, list);
+            }
+            if (list.size() < 9) {
+                continue;
+            }
+            GCActivity gcActivity = new GCActivity(
+                    Integer.parseInt(list.get(0)),
+                    Integer.parseInt(list.get(1)),
+                    Integer.parseInt(list.get(2)),
+                    Integer.parseInt(list.get(3)),
+                    Integer.parseInt(list.get(4)),
+                    Integer.parseInt(list.get(5)),
+                    Double.parseDouble(list.get(6)),
+                    Double.parseDouble(list.get(7)),
+                    Double.parseDouble(list.get(8)));
+            gcActivities.add(gcActivity);
+        }
+        return gcActivities;
     }
 
-    public static void main(String[] args) {
+    private static void addMatchGroupToList(Matcher matcher, List<String> list) {
+        for (int i = 1; i <= matcher.groupCount(); i++) {
+            String group = matcher.group(i);
+            if (group != null) {
+                list.add(matcher.group(i));
+            }
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
