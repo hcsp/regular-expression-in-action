@@ -9,6 +9,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
+    private static final Pattern isGcLogPattern = Pattern.compile("^[\\d-]+");
+    private static final Pattern logPattern = Pattern.compile("PSYoungGen:\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\)].*\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\).*[\\d.]+\\s+secs.*user=([\\d.]+)\\s+sys=([\\d.]+),\\s+real=([\\d.]+)");
+
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
@@ -34,28 +37,20 @@ public class GCLogAnalyzer {
     }
 
     public static boolean isGcLog(String log) {
-        return Pattern.compile("^[\\d-]+").matcher(log).find();
+        return isGcLogPattern.matcher(log).find();
     }
 
     public static GCActivity logToGcObject(String log) {
         int youGenBefore = 0;
         int youngGenAfter = 0;
-        ;
         int youngGenTotal = 0;
-        ;
         int heapBefore = 0;
-        ;
         int heapAfter = 0;
-        ;
         int heapTotal = 0;
-        ;
         double user = 0;
-        ;
         double sys = 0;
-        ;
         double real = 0;
-        ;
-        Pattern logPattern = Pattern.compile("PSYoungGen:\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\)].*\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\).*[\\d.]+\\s+secs.*user=([\\d.]+)\\s+sys=([\\d.]+),\\s+real=([\\d.]+)");
+
         Matcher logMatcher = logPattern.matcher(log);
 
         while (logMatcher.find()) {
