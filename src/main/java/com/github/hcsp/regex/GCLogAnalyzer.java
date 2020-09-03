@@ -1,7 +1,12 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -17,7 +22,54 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        try {
+            return Files.readAllLines(gcLog.toPath())
+                    .stream()
+                    .filter(GCLogAnalyzer::isGcLog)
+                    .map(GCLogAnalyzer::logToGcObject)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean isGcLog(String log) {
+        return Pattern.compile("^[\\d-]+").matcher(log).find();
+    }
+
+    public static GCActivity logToGcObject(String log) {
+        int youGenBefore = 0;
+        int youngGenAfter = 0;
+        ;
+        int youngGenTotal = 0;
+        ;
+        int heapBefore = 0;
+        ;
+        int heapAfter = 0;
+        ;
+        int heapTotal = 0;
+        ;
+        double user = 0;
+        ;
+        double sys = 0;
+        ;
+        double real = 0;
+        ;
+        Pattern logPattern = Pattern.compile("PSYoungGen:\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\)].*\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\).*[\\d.]+\\s+secs.*user=([\\d.]+)\\s+sys=([\\d.]+),\\s+real=([\\d.]+)");
+        Matcher logMatcher = logPattern.matcher(log);
+
+        while (logMatcher.find()) {
+            youGenBefore = Integer.parseInt(logMatcher.group(1));
+            youngGenAfter = Integer.parseInt(logMatcher.group(2));
+            youngGenTotal = Integer.parseInt(logMatcher.group(3));
+            heapBefore = Integer.parseInt(logMatcher.group(4));
+            heapAfter = Integer.parseInt(logMatcher.group(5));
+            heapTotal = Integer.parseInt(logMatcher.group(6));
+            user = Double.parseDouble(logMatcher.group(7));
+            sys = Double.parseDouble(logMatcher.group(8));
+            real = Double.parseDouble(logMatcher.group(9));
+        }
+        return new GCActivity(youGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real);
     }
 
     public static void main(String[] args) {
