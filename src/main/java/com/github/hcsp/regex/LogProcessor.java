@@ -18,19 +18,18 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
-    private static final Pattern datePattern = Pattern.compile("^\\[\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}\\]\\s");
 
     public static String process(String log) {
-        return Arrays.stream(log.split("\\n"))
-                .map(line -> datePattern.matcher(line).replaceAll(""))
-                .collect(Collectors.joining("\n"));
+        String replace = "(?m)^(\\[\\d{4}-\\d{1,2}-\\d{1,2} \\d{2}:\\d{2}:\\d{2}\\])";
+        return log.replaceAll(replace, "");
     }
 
     public static void main(String[] args) {
-        String str =
-                "[2019-08-01 21:24:42] TeamCity server version is 2019.1.1 [2019-01-01 00:00:00] (build 66192)\n"
+        String string =
+                "[2019-08-01 21:24:41] bt3102 (11m:21s)\n"
+                        + "[2019-08-01 21:24:42] TeamCity server version is 2019.1.1 (build 66192)\n"
                         + "[2019-08-01 21:24:43] Collecting changes in 2 VCS roots (22s)\n";
 
-        System.out.println(process(str));
+        System.out.println(process(string));
     }
 }

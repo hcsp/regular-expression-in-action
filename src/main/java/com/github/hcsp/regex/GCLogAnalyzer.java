@@ -24,35 +24,32 @@ public class GCLogAnalyzer {
     private static final Pattern gcPattern = Pattern.compile("(\\d+)K->(\\d+)K\\((\\d+)K\\).*\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).*user=(\\d+\\.\\d+).*sys=(\\d+\\.\\d+).*real=(\\d+\\.\\d+)");
 
 
-    public static List<GCActivity> parse(File gcLog) {
-        try {
-            List<GCActivity> activities = new ArrayList<>();
-            List<String> lines = Files.readAllLines(gcLog.toPath());
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+        final Pattern PATTER_COMPILED = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\).*\\]\\s(\\d+)K->(\\d+)K\\((\\d+)K\\),.+user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)");
 
-            for (String line : lines) {
-                Matcher matcher = gcPattern.matcher(line);
-                while (matcher.find()) {
-                    GCActivity activity = new GCActivity(
-                            Integer.parseInt(matcher.group(1)),
-                            Integer.parseInt(matcher.group(2)),
-                            Integer.parseInt(matcher.group(3)),
-                            Integer.parseInt(matcher.group(4)),
-                            Integer.parseInt(matcher.group(5)),
-                            Integer.parseInt(matcher.group(6)),
-                            Double.parseDouble(matcher.group(7)),
-                            Double.parseDouble(matcher.group(8)),
-                            Double.parseDouble(matcher.group(9))
-                    );
-                    activities.add(activity);
-                }
+        List<GCActivity> list = new ArrayList<>();
+
+        List<String> lines = Files.readAllLines(new File("gc.log").toPath());
+        for (String line : lines) {
+            Matcher matcher = PATTER_COMPILED.matcher(line);
+            while (matcher.find()) {
+                list.add(new GCActivity(Integer.parseInt(matcher.group(1)),
+                        Integer.parseInt(matcher.group(2)),
+                        Integer.parseInt(matcher.group(3)),
+                        Integer.parseInt(matcher.group(4)),
+                        Integer.parseInt(matcher.group(5)),
+                        Integer.parseInt(matcher.group(6)),
+                        Double.parseDouble(matcher.group(7)),
+                        Double.parseDouble(matcher.group(8)),
+                        Double.parseDouble(matcher.group(9))
+                ));
             }
-            return activities;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
         }
+        return list;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }

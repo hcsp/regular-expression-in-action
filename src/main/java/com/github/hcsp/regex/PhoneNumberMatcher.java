@@ -1,5 +1,6 @@
 package com.github.hcsp.regex;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PhoneNumberMatcher {
@@ -16,9 +17,13 @@ public class PhoneNumberMatcher {
     // 02134-1234 位数不对
     // 123-45678901 区号必须以0开头
     // 021-1234567 三位区号后面只能跟八位电话号码
-    private static final Pattern telPattern = Pattern.compile("^(0\\d{2}-[1-9]{8}|0\\d{3}-[1-9]{7,8})$");
 
     public static boolean isPhoneNumber(String str) {
-        return telPattern.matcher(str).find();
+        Pattern pattern = Pattern.compile("(^0\\d{2,3})-([^0]\\d{6,7})");
+        Matcher matcher = pattern.matcher(str);
+        if (matcher.find()) {
+            return (matcher.group(1)).length() != 3 || (matcher.group(2)).length() == 8;
+        }
+        return false;
     }
 }
