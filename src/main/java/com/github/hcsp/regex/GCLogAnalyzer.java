@@ -1,13 +1,7 @@
 package com.github.hcsp.regex;
 
-
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -23,43 +17,8 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        List<GCActivity> result = new ArrayList<>();
-        Pattern gcMemoryPattern = Pattern.compile("\\[PSYoungGen:\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\)\\].*\\s+(\\d+)K->(\\d+)K\\((\\d+)K\\),\\s+.*[\\d.]+\\s+secs\\]");
-        Pattern gcTimePattern = Pattern.compile("\\w+=(\\d*.\\d*).*\\w+=(\\d*.\\d*).*\\w+=(\\d*.\\d*)");
-        try {
-            for (String line : Files.readAllLines(gcLog.toPath())) {
-                Matcher gcMemoryMatcher = gcMemoryPattern.matcher(line);
-                Matcher gcTimeMatcher = gcTimePattern.matcher(line);
-                if (gcMemoryMatcher.find() && gcTimeMatcher.find()) {
-                    // 年轻代GC前内存占用，单位K
-                    int youngGenBefore = Integer.valueOf(gcMemoryMatcher.group(1));
-                    // 年轻代GC后内存占用，单位K
-                    int youngGenAfter = Integer.valueOf(gcMemoryMatcher.group(2));
-                    // 年轻代总内存，单位K
-                    int youngGenTotal = Integer.valueOf(gcMemoryMatcher.group(3));
-                    // JVM堆GC前内存占用，单位K
-                    int heapBefore = Integer.valueOf(gcMemoryMatcher.group(4));
-                    // JVM堆GC后内存占用，单位K
-                    int heapAfter = Integer.valueOf(gcMemoryMatcher.group(5));
-                    // JVM堆总内存，单位K
-                    int heapTotal = Integer.valueOf(gcMemoryMatcher.group(6));
-                    // 用户态时间
-                    double user = Double.valueOf(gcTimeMatcher.group(1));
-                    // 系统调用消耗时间
-                    double sys = Double.valueOf(gcTimeMatcher.group(2));
-                    // 物理世界流逝的时间
-                    double real = Double.valueOf(gcTimeMatcher.group(3));
-
-                    result.add(new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real));
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return result;
+        return null;
     }
-
 
     public static void main(String[] args) {
         List<GCActivity> activities = parse(new File("gc.log"));
