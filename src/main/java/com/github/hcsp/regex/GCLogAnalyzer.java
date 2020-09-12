@@ -22,18 +22,18 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
 
-    private static final String gcRegex = "(\\d+)K->(\\d+)K\\((\\d+)K\\).* "
+    private static final String GC_REGEX = "(\\d+)K->(\\d+)K\\((\\d+)K\\).* "
             + "(\\d+)K->(\\d+)K\\((\\d+)K\\).*"
             + "\\[Times: user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)";
 
-    private static final Pattern gcPattern = Pattern.compile(gcRegex);
+    private static final Pattern GC_PATTERN = Pattern.compile(GC_REGEX);
 
     public static List<GCActivity> parse(File gcLog) {
         try {
             final List<String> lines = Files.readAllLines(gcLog.toPath());
             return lines
                     .stream()
-                    .map(gcPattern::matcher)
+                    .map(GC_PATTERN::matcher)
                     .filter(Matcher::find)
                     .map(GCLogAnalyzer::getGCActivity)
                     .collect(Collectors.toList());
