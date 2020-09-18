@@ -1,7 +1,11 @@
 package com.github.hcsp.regex;
 
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,11 +20,38 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) {
-        return null;
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+        List<String> lines = Files.readAllLines(gcLog.toPath());
+        List<GCActivity> activities = new ArrayList<>();
+
+        Pattern youngGenPattern = Pattern.compile("\\[PSYoungGen: +([0-9]*)K->([0-9]*)K\\(([0-9]*)K\\)]");
+        Pattern heapPattern = Pattern.compile("([0-9]*)K->([0-9]*)K\\(([0-9]*)K\\),");
+        Pattern timePattern = Pattern.compile("\\[Times: user=(\\d+\\.\\d+) sys=(\\d\\.\\d+), real=(\\d+\\.\\d+) secs]");
+        for (String line : lines) {
+            Matcher youngGenMatcher = youngGenPattern.matcher(line);
+            if (youngGenMatcher.find()) {
+                int youngGenBefore = Integer.parseInt(youngGenMatcher.group(1));
+                int youngGenAfter = Integer.parseInt(youngGenMatcher.group(2));
+                int youngGenTotal = Integer.parseInt(youngGenMatcher.group(3));
+                Matcher heapMatcher = heapPattern.matcher(line);
+                if (heapMatcher.find()) {
+                    int heapBefore = Integer.parseInt(heapMatcher.group(1));
+                    int heapAfter = Integer.parseInt(heapMatcher.group(2));
+                    int heapTotal = Integer.parseInt(heapMatcher.group(3));
+                    Matcher timeMatcher = timePattern.matcher(line);
+                    if (timeMatcher.find()) {
+                        double user = Double.parseDouble(timeMatcher.group(1));
+                        double sys = Double.parseDouble(timeMatcher.group(2));
+                        double real = Double.parseDouble(timeMatcher.group(3));
+                        activities.add(new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real));
+                    }
+                }
+            }
+        }
+        return activities;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }

@@ -14,7 +14,8 @@ public class PhoneNumberMatcher {
     // 02134-1234 位数不对
     // 123-45678901 区号必须以0开头
     // 021-1234567 三位区号后面只能跟八位电话号码
+    public static final String PHONE_REGEX = "0[0-9]{2}-[1-9]{8}|0[0-9]{3}-[1-9]{7,8}";
     public static boolean isPhoneNumber(String str) {
-        return false;
+        return str.matches(PHONE_REGEX);
     }
 }
