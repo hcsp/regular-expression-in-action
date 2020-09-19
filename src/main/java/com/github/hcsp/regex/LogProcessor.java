@@ -21,7 +21,7 @@ public class LogProcessor {
     public static String process(String log) {
         Matcher matcher = getMatcher("((\\[\\d{4}(-\\d{2}){2}\\s(\\d{2}:){2}\\d{2}])\\s)(.+\\s)", log);
         StringBuilder sb = new StringBuilder();
-        while (matcher.find()){
+        while (matcher.find()) {
             sb.append(matcher.group(5));
         }
         return sb.toString();
