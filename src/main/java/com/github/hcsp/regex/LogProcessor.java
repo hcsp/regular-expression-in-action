@@ -1,5 +1,9 @@
 package com.github.hcsp.regex;
 
+import java.util.regex.Matcher;
+
+import static com.github.hcsp.regex.PhoneNumberMatcher.getMatcher;
+
 public class LogProcessor {
     // 传入日志字符串，将每行开头的时间戳删除
     // 返回删除时间戳后的字符串
@@ -15,7 +19,12 @@ public class LogProcessor {
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
     public static String process(String log) {
-        return null;
+        Matcher matcher = getMatcher("((\\[\\d{4}(-\\d{2}){2}\\s(\\d{2}:){2}\\d{2}])\\s)(.+\\s)", log);
+        StringBuilder sb = new StringBuilder();
+        while (matcher.find()){
+            sb.append(matcher.group(5));
+        }
+        return sb.toString();
     }
 
     public static void main(String[] args) {
