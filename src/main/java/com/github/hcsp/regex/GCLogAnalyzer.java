@@ -1,60 +1,26 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
-//     2019-08-21T07:48:17.401+0200: 2.924: [GC (Allocation Failure) [PSYoungGen:
-//     393216K->6384K(458752K)] 416282K->29459K(1507328K), 0.0051622 secs] [Times: user=0.02
-//     sys=0.00, real=0.01 secs]
-//     例如，对于上面这行GC日志，
-//     [PSYoungGen: 393216K->6384K(458752K)] 代表JVM的年轻代总内存为458752，经过GC后已用内存从393216下降到了6384
-//     416282K->29459K(1507328K) 代表JVM总堆内存1507328，经过GC后已用内存从416282下降到了29459
-//     user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
+    // 2019-08-21T07:48:17.401+0200: 2.924: [GC (Allocation Failure) [PSYoungGen:
+    // 393216K->6384K(458752K)] 416282K->29459K(1507328K), 0.0051622 secs] [Times: user=0.02
+    // sys=0.00, real=0.01 secs]
+    // 例如，对于上面这行GC日志，
+    // [PSYoungGen: 393216K->6384K(458752K)] 代表JVM的年轻代总内存为458752，经过GC后已用内存从393216下降到了6384
+    // 416282K->29459K(1507328K) 代表JVM总堆内存1507328，经过GC后已用内存从416282下降到了29459
+    // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    private static Pattern pattern = Pattern.compile("(\\d+)K->(\\d+)K\\W(\\d+)K\\W+?(?:.+e\\W+)?((\\d+)K->(\\d+)K\\W(\\d+)).+ user=(.*) sys=(.*), real=(.*)secs");
-
-    public static List<GCActivity> parse(File gcLog) throws IOException {
-        List<String> log = Files.readAllLines(gcLog.toPath());
-        return log
-                .stream()
-                .filter(GCLogAnalyzer::find)
-                .map(GCLogAnalyzer::getGCActivity)
-                .collect(Collectors.toList());
+    public static List<GCActivity> parse(File gcLog) {
+        return null;
     }
 
-    public static Boolean find(String s) {
-        return pattern.matcher(s).find();
-    }
-
-    private static GCActivity getGCActivity(String s) {
-        Matcher matcher = pattern.matcher(s);
-        return matcher.find() ? creatGCActivity(matcher) : null;
-    }
-
-    private static GCActivity creatGCActivity(Matcher matcher) {
-        return new GCActivity(
-                Integer.parseInt(matcher.group(1)),
-                Integer.parseInt(matcher.group(2)),
-                Integer.parseInt(matcher.group(3)),
-                Integer.parseInt(matcher.group(5)),
-                Integer.parseInt(matcher.group(6)),
-                Integer.parseInt(matcher.group(7)),
-                Double.parseDouble(matcher.group(8)),
-                Double.parseDouble(matcher.group(9)),
-                Double.parseDouble(matcher.group(10)));
-    }
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
