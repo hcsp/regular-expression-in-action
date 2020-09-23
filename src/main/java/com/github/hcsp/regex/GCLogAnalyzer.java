@@ -1,7 +1,12 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,11 +21,49 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) {
-        return null;
+    // 2019-08-21T07:48:16.617+0200: 2.140: [Full GC (Metadata GC Threshold) [PSYoungGen: 16486K->0K(458752K)] [ParOldGen: 19458K->23066K(1048576K)] 35944K->23066K(1507328K), [Metaspace: 34726K->34723K(1079296K)], 0.0324194 secs] [Times: user=0.09 sys=0.00, real=0.03 secs]
+
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+        List<String> lines = Files.readAllLines(gcLog.toPath());
+        List<GCActivity> lists = new ArrayList<>();
+        Pattern matchPsYoung = Pattern.compile("\\[PSYoungGen:\\s+([0-9]*)K->([0-9]*)K\\(([0-9]*)K\\)]");  // get psYoung
+        Pattern matchHeap = Pattern.compile("([0-9]*)K->([0-9]*)K\\(([0-9]*)K\\),");  // get heap
+        Pattern matchTime = Pattern.compile("\\[Times: user=(\\d+\\.\\d+)\\s+sys=(\\d+\\.\\d+),\\s+real=(\\d+\\.\\d+)\\ssecs]");
+        for (String line:
+                lines) {
+            int youngGenBefore;
+            int youngGenAfter;
+            int youngGenTotal;
+            int heapBefore;
+            int heapAfter;
+            int heapTotal;
+            double user;
+            double sys;
+            double real;
+            Matcher psYoungMatcher = matchPsYoung.matcher(line);
+            if (psYoungMatcher.find()) {
+                youngGenBefore = Integer.parseInt(psYoungMatcher.group(1));
+                youngGenAfter = Integer.parseInt(psYoungMatcher.group(2));
+                youngGenTotal = Integer.parseInt(psYoungMatcher.group(3));
+                Matcher heapMatcher = matchHeap.matcher(line);
+                if (heapMatcher.find()) {
+                    heapBefore = Integer.parseInt(heapMatcher.group(1));
+                    heapAfter = Integer.parseInt(heapMatcher.group(2));
+                    heapTotal = Integer.parseInt(heapMatcher.group(3));
+                    Matcher timeMatcher = matchTime.matcher(line);
+                    if (timeMatcher.find()) {
+                        user = Double.parseDouble(timeMatcher.group(1));
+                        sys = Double.parseDouble(timeMatcher.group(2));
+                        real = Double.parseDouble(timeMatcher.group(3));
+                        lists.add(new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real));
+                    }
+                }
+            }
+        };
+        return lists;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
@@ -127,3 +170,5 @@ public class GCLogAnalyzer {
         }
     }
 }
+
+
