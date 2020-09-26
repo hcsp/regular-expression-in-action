@@ -1,7 +1,13 @@
 package com.github.hcsp.regex;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,11 +22,38 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) {
-        return null;
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+        List<GCActivity> list = new ArrayList<>();
+        String youngGenRegex = "\\[PSYoungGen:[ ](\\d+)K->(\\d+)K\\((\\d+)K\\)\\]";
+        String jvmRegex = "[ ](\\d+)K->(\\d+)K\\((\\d+)K\\),";
+        String timeRegex = "\\[Times:[ ]user=(-?\\d+\\.\\d+?)[ ]sys=(-?\\d+\\.\\d+?),[ ]real=(-?\\d+\\.\\d+?)[ ]secs\\]";
+        Pattern youngGenGC = Pattern.compile(youngGenRegex);
+        Pattern jvmGC = Pattern.compile(jvmRegex);
+        Pattern times = Pattern.compile(timeRegex);
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(gcLog));
+        String str = null;
+        while ((str = bufferedReader.readLine()) != null) {
+            Matcher matcherYoungGen = youngGenGC.matcher(str);
+            Matcher matcherJvm = jvmGC.matcher(str);
+            Matcher matcherTimes = times.matcher(str);
+            while (matcherYoungGen.find() && matcherJvm.find() && matcherTimes.find()) {
+                list.add(new GCActivity(
+                        Integer.parseInt(matcherYoungGen.group(1)),
+                        Integer.parseInt(matcherYoungGen.group(2)),
+                        Integer.parseInt(matcherYoungGen.group(3)),
+                        Integer.parseInt(matcherJvm.group(1)),
+                        Integer.parseInt(matcherJvm.group(2)),
+                        Integer.parseInt(matcherJvm.group(3)),
+                        Double.parseDouble(matcherTimes.group(1)),
+                        Double.parseDouble(matcherTimes.group(2)),
+                        Double.parseDouble(matcherTimes.group(3))
+                ));
+            }
+        }
+        return list;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
