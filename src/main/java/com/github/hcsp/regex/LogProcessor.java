@@ -9,15 +9,13 @@ public class LogProcessor {
     // [2019-08-01 21:24:42] TeamCity server version is 2019.1.1 (build 66192)
     // [2019-08-01 21:24:43] Collecting changes in 2 VCS roots (22s)
     //
-    // 返回结果：<[2019-01-01 00:00:00] TeamCity server version is 2019.1.1 [2019-01-01 00:00:00] (build 66192)>
+    // 返回结果：
     //
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
-
-    public static final String TIMESTAMP_REGEX = "(?<=^|\\n)\\[\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}]\\s";
     public static String process(String log) {
-        return log.replaceAll(TIMESTAMP_REGEX, "");
+        return null;
     }
 
     public static void main(String[] args) {
