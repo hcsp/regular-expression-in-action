@@ -1,7 +1,5 @@
 package com.github.hcsp.regex;
 
-import java.util.regex.Pattern;
-
 public class PhoneNumberMatcher {
     // 请编写一个函数，判断一个字符串是不是合法的固定电话号码
     // 合法的固定电话号码为：区号-号码
@@ -16,16 +14,7 @@ public class PhoneNumberMatcher {
     // 02134-1234 位数不对
     // 123-45678901 区号必须以0开头
     // 021-1234567 三位区号后面只能跟八位电话号码
-    private static final Pattern PATTERN = Pattern.compile("0\\d{2}-[1-9]{8}|0\\d{3}-[1-9]{7,8}");
-
     public static boolean isPhoneNumber(String str) {
-        return PATTERN.matcher(str).matches();
-    }
-
-    public static void main(String[] args) {
-        String valid = "0571-12345678";
-        String invalid = "021-1234567";
-        System.out.println(PATTERN.matcher(valid).matches());
-        System.out.println(PATTERN.matcher(invalid).matches());
+        return false;
     }
 }
