@@ -1,7 +1,13 @@
 package com.github.hcsp.regex;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,7 +22,31 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
+    static final Pattern PATTERN = Pattern.compile("\\[PSYoungGen:\\s(?<ygb>[0-9]+)K->(?<yga>[0-9]+)K\\((?<ygt>[0-9]+)K\\)](\\s\\[.*])*\\s(?<hb>[0-9]+)K->(?<ha>[0-9]+)K\\((?<ht>[0-9]+)K\\),(\\s\\[.*],)*\\s([0-9]*[.]?)?[0-9]+\\ssecs]\\s\\[Times:\\suser=(?<ut>([0-9]*[.]?)?[0-9]+)\\ssys=(?<st>([0-9]*[.]?)?[0-9]+),\\sreal=(?<rt>([0-9]*[.]?)?[0-9]+)\\ssecs]");
+    static final Pattern PATTERN2 = Pattern.compile("\\[PSYoungGen:\\s(?<ygb>[0-9]+)K->(?<yga>[0-9]+)K\\((?<ygt>[0-9]+)K\\)](\\s\\[.*])\\s(?<hb>[0-9]+)K");
+
     public static List<GCActivity> parse(File gcLog) {
+        try (BufferedReader bufferedReader = Files.newBufferedReader(gcLog.toPath())) {
+            return bufferedReader.lines().filter(line -> parse(line) != null).map(GCLogAnalyzer::parse).collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static GCActivity parse(String line) {
+        Matcher matcher = PATTERN.matcher(line);
+        if (matcher.find()) {
+            int youngGenBefore = Integer.parseInt(matcher.group("ygb"));
+            int youngGenAfter = Integer.parseInt(matcher.group("yga"));
+            int youngGenTotal = Integer.parseInt(matcher.group("ygt"));
+            int heapBefore = Integer.parseInt(matcher.group("hb"));
+            int heapAfter = Integer.parseInt(matcher.group("ha"));
+            int heapTotal = Integer.parseInt(matcher.group("ht"));
+            double user = Double.parseDouble(matcher.group("ut"));
+            double sys = Double.parseDouble(matcher.group("st"));
+            double real = Double.parseDouble(matcher.group("rt"));
+            return new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real);
+        }
         return null;
     }
 
