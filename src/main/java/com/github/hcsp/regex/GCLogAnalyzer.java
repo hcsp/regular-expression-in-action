@@ -1,12 +1,7 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -21,33 +16,11 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) throws IOException {
-        List<GCActivity> list = new ArrayList<>();
-        Pattern gcPattern1 = Pattern.compile("\\[PSYoungGen: (\\d*)K->(\\d*)K\\((\\d*)K\\)].* (\\d*)K->(\\d*)K\\((\\d*)K\\)");
-        Pattern gcPattern2 = Pattern.compile("user=((-?\\d)(.\\d*)?) sys=((-?\\d)(.\\d*)?), real=((-?\\d)(.\\d*)?)");
-        List<String> lines = Files.readAllLines(gcLog.toPath());
-        for (String line : lines) {
-            Matcher matcher1 = gcPattern1.matcher(line);
-            Matcher matcher2 = gcPattern2.matcher(line);
-            if (matcher1.find() && matcher2.find()) {
-                int youngGenBefore = Integer.parseInt(matcher1.group(1));
-                int youngGenAfter = Integer.parseInt(matcher1.group(2));
-                int youngGenTotal = Integer.parseInt(matcher1.group(3));
-                int heapBefore = Integer.parseInt(matcher1.group(4));
-                int heapAfter = Integer.parseInt(matcher1.group(5));
-                int heapTotal = Integer.parseInt(matcher1.group(6));
-
-                double user = Double.parseDouble(matcher2.group(1));
-                double sys = Double.parseDouble(matcher2.group(4));
-                double real = Double.parseDouble(matcher2.group(7));
-
-                list.add(new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real));
-            }
-        }
-        return list;
+    public static List<GCActivity> parse(File gcLog) {
+        return null;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
@@ -96,25 +69,25 @@ public class GCLogAnalyzer {
         @Override
         public String toString() {
             return "GCActivity{"
-                   + "youngGenBefore="
-                   + youngGenBefore
-                   + ", youngGenAfter="
-                   + youngGenAfter
-                   + ", youngGenTotal="
-                   + youngGenTotal
-                   + ", heapBefore="
-                   + heapBefore
-                   + ", heapAfter="
-                   + heapAfter
-                   + ", heapTotal="
-                   + heapTotal
-                   + ", user="
-                   + user
-                   + ", sys="
-                   + sys
-                   + ", real="
-                   + real
-                   + '}';
+                    + "youngGenBefore="
+                    + youngGenBefore
+                    + ", youngGenAfter="
+                    + youngGenAfter
+                    + ", youngGenTotal="
+                    + youngGenTotal
+                    + ", heapBefore="
+                    + heapBefore
+                    + ", heapAfter="
+                    + heapAfter
+                    + ", heapTotal="
+                    + heapTotal
+                    + ", user="
+                    + user
+                    + ", sys="
+                    + sys
+                    + ", real="
+                    + real
+                    + '}';
         }
 
         public int getYoungGenBefore() {

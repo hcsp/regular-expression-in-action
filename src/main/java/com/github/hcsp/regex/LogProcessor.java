@@ -15,15 +15,14 @@ public class LogProcessor {
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
     public static String process(String log) {
-        String logRegex = "(?m)^\\[\\d{4}(-\\d{2}){2} (\\d{2}:){2}\\d{2}] ";
-        return log.replaceAll(logRegex, "");
+        return null;
     }
 
     public static void main(String[] args) {
         String str =
                 "[2019-08-01 21:24:41] bt3102 (11m:21s)\n"
-                + "[2019-08-01 21:24:42] TeamCity server version is 2019.1.1 (build 66192)\n"
-                + "[2019-08-01 21:24:43] Collecting changes in 2 VCS roots (22s)\n";
+                        + "[2019-08-01 21:24:42] TeamCity server version is 2019.1.1 (build 66192)\n"
+                        + "[2019-08-01 21:24:43] Collecting changes in 2 VCS roots (22s)\n";
 
         System.out.println(process(str));
     }
