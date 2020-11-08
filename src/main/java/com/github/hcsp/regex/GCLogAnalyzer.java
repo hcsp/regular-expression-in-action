@@ -1,9 +1,18 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
+    public static final Pattern PS_YOUNG_GEN_PATTERN = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\)\\][^\\d]*(\\d+)K->(\\d+)K\\((\\d+)K\\)");
+    public static final Pattern TIME_PATTERN = Pattern.compile("user=([\\d.]+).*sys=([\\d.]+).*real=([\\d.]+)");
+
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
@@ -17,7 +26,49 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        try {
+            return Files.readAllLines(gcLog.toPath())
+                    .stream()
+                    .map(GCLogAnalyzer::transformLineToGCActivity)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static GCActivity transformLineToGCActivity(String line) {
+        Matcher heapValueMather = PS_YOUNG_GEN_PATTERN.matcher(line);
+        Matcher timeValueMather = TIME_PATTERN.matcher(line);
+        if (!heapValueMather.find() || !timeValueMather.find()) {
+            return null;
+        }
+        int youngGenBefore;
+        int youngGenAfter;
+        int youngGenTotal;
+        int heapBefore;
+        int heapAfter;
+        int heapTotal;
+        double user;
+        double sys;
+        double real;
+        do {
+            youngGenBefore = Integer.parseInt(heapValueMather.group(1));
+            youngGenAfter = Integer.parseInt(heapValueMather.group(2));
+            youngGenTotal = Integer.parseInt(heapValueMather.group(3));
+            heapBefore = Integer.parseInt(heapValueMather.group(4));
+            heapAfter = Integer.parseInt(heapValueMather.group(5));
+            heapTotal = Integer.parseInt(heapValueMather.group(6));
+        } while (heapValueMather.find());
+        do {
+            user = Double.parseDouble(timeValueMather.group(1));
+            sys = Double.parseDouble(timeValueMather.group(2));
+            real = Double.parseDouble(timeValueMather.group(3));
+        } while (timeValueMather.find());
+        return new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal,
+                heapBefore, heapAfter, heapTotal,
+                user, sys, real);
     }
 
     public static void main(String[] args) {
