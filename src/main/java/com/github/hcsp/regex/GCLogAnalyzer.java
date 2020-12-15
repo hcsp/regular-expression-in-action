@@ -1,7 +1,10 @@
 package com.github.hcsp.regex;
 
-import java.io.File;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -17,7 +20,78 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+
+
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            BufferedReader reader = new BufferedReader(
+                new FileReader(gcLog)
+            );
+
+            String buffer;
+
+            while ( (buffer = reader.readLine()) != null ) {
+                sb.append(buffer);
+            }
+
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // [PSYoungGen: 163389K->16486K(458752K)] 182840K->35944K(1507328K),
+        // ] [ParOldGen: 16K->19450K(1048576K)] 20229K->19450K(1507328K), [Metaspace
+        // ] 182840K->35944K(1507328K),
+        Pattern pattern01 = Pattern.compile("" +
+                "(\\[PSYoungGen\\:\\s\\d+K\\-\\>\\d+K\\(\\d+K\\))" +
+                "|" +
+                "(\\]\\s\\d+K\\-\\>\\d+K\\(\\d+K\\)\\,\\s)" +
+                "|" +
+                "(\\[Times:\\suser=\\d+\\.\\d+\\ssys=0\\.\\d+,\\sreal=0\\.\\d+\\ssecs])");
+
+        Matcher matcher = pattern01.matcher(sb.toString());
+        StringBuilder sb2 = new StringBuilder();
+
+        while (matcher.find()) {
+            sb2.append(matcher.group());
+        }
+
+        Pattern pattern02 = Pattern.compile("\\d+K|\\=\\d+\\.\\d+");
+
+
+        Matcher m = pattern02.matcher(sb2.toString());
+
+        int [] heaps = new int [6];
+        double [] times = new double [3];
+
+        List <GCActivity> results = new ArrayList<>();
+
+        while (m.find()) {
+            for (int i = 0; i < 6; i++) {
+                heaps[i] =
+                        Integer.parseUnsignedInt( m.group().replace("K", "") )
+                ;
+                m.find();
+            }
+
+            for (int i = 0; i < 3; i++) {
+                times[i] =
+                        Double.parseDouble( m.group().replace("=", "") )
+                ;
+                if (i != 2)
+                    m.find();
+            }
+
+            results.add(
+                new GCActivity(heaps[0], heaps[1], heaps[2], heaps[3], heaps[4], heaps[5],
+                        times[0], times[1], times[2])
+            );
+
+        }
+
+
+        return results;
     }
 
     public static void main(String[] args) {
