@@ -59,37 +59,33 @@ public class GCLogAnalyzer {
 
         Pattern pattern02 = Pattern.compile("\\d+K|\\=\\d+\\.\\d+");
 
-
         Matcher m = pattern02.matcher(sb2.toString());
 
         int [] heaps = new int [6];
         double [] times = new double [3];
 
-        List <GCActivity> results = new ArrayList<>();
+        List<GCActivity> results = new ArrayList<>();
 
         while (m.find()) {
             for (int i = 0; i < 6; i++) {
                 heaps[i] =
-                        Integer.parseUnsignedInt( m.group().replace("K", "") )
-                ;
+                        Integer.parseUnsignedInt( m.group().replace("K", "") );
                 m.find();
             }
 
             for (int i = 0; i < 3; i++) {
                 times[i] =
-                        Double.parseDouble( m.group().replace("=", "") )
-                ;
-                if (i != 2)
+                        Double.parseDouble( m.group().replace("=", "") );
+                if (i != 2) {
                     m.find();
+                }
+
             }
 
             results.add(
                 new GCActivity(heaps[0], heaps[1], heaps[2], heaps[3], heaps[4], heaps[5],
-                        times[0], times[1], times[2])
-            );
-
+                        times[0], times[1], times[2]) );
         }
-
 
         return results;
     }
