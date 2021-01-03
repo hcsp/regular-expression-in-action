@@ -24,8 +24,8 @@ public class GCLogAnalyzer {
     public static List<GCActivity> parse(File gcLog) throws IOException {
         List<GCActivity> res = new ArrayList<>();
         List<String> lines = Files.readAllLines(gcLog.toPath());
+        Pattern pattern = Pattern.compile("\\[PSYoungGen:\\ (\\d+)K->(\\d+)K\\((\\d+)K\\)\\](?:\\s*|\\s*\\[.*\\]\\s*)(\\d+)K->(\\d+)K\\((\\d+)K\\).*\\[Times: user=(\\d+\\.\\d+).*sys=(\\d+.\\d+).*real=(\\d+\\.\\d+)");
         lines.forEach(line -> {
-            Pattern pattern = Pattern.compile("\\[PSYoungGen:\\ (\\d+)K->(\\d+)K\\((\\d+)K\\)\\](?:\\s*|\\s*\\[.*\\]\\s*)(\\d+)K->(\\d+)K\\((\\d+)K\\).*\\[Times: user=(\\d+\\.\\d+).*sys=(\\d+.\\d+).*real=(\\d+\\.\\d+)");
             Matcher matcher = pattern.matcher(line);
             if (matcher.find()) {
                 int youngGenBefore = Integer.parseInt(matcher.group(1));
