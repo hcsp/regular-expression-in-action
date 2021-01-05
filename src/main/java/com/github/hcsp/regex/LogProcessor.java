@@ -15,7 +15,7 @@ public class LogProcessor {
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
     public static String process(String log) {
-        return null;
+        return log.replaceAll("(^|\\n)\\[\\d{4}(-\\d{2}){2}\\s(\\d{2}:){2}\\d{2}\\]", "\n").substring(1);
     }
 
     public static void main(String[] args) {
