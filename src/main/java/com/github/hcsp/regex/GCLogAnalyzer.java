@@ -1,10 +1,8 @@
 package com.github.hcsp.regex;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,7 +22,7 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) throws IOException {
-        List<String> list = FileUtils.readLines(gcLog, StandardCharsets.UTF_8);
+        List<String> list = Files.readAllLines(gcLog.toPath());
         List<GCActivity> result = new ArrayList<>();
         for (String s : list
         ) {

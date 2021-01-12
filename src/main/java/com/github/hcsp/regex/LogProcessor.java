@@ -1,6 +1,6 @@
 package com.github.hcsp.regex;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.Arrays;
 
 
 public class LogProcessor {
@@ -22,7 +22,7 @@ public class LogProcessor {
         for (int i = 0; i < str.length; i++) {
             str[i] = str[i].replaceFirst("\\[\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}]\\s", "");
         }
-        return StringUtils.join(str, "\n");
+        return String.join("\n", Arrays.asList(str));
     }
 
     public static void main(String[] args) {
