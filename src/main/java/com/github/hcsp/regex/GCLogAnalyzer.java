@@ -1,7 +1,14 @@
 package com.github.hcsp.regex;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,8 +23,36 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
+    private static final Pattern PRECOMPILED_PATTERN = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\).*\\]\\s(\\d+)K->(\\d+)K\\((\\d+)K\\),.+user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)");
+
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        List<GCActivity> gcActivities = new ArrayList<>();
+        try (FileInputStream fileInputStream = new FileInputStream(gcLog);
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            String line;
+            while((line = bufferedReader.readLine())!= null) {
+                Matcher matcher = PRECOMPILED_PATTERN.matcher(line);
+                if (matcher.find()) {
+                    gcActivities.add(constructGCActivity(matcher));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return gcActivities;
+    }
+
+    private static GCActivity constructGCActivity(Matcher matcher) {
+        return new GCActivity(Integer.parseInt(matcher.group(1)),
+                Integer.parseInt(matcher.group(2)),
+                Integer.parseInt(matcher.group(3)),
+                Integer.parseInt(matcher.group(4)),
+                Integer.parseInt(matcher.group(5)),
+                Integer.parseInt(matcher.group(6)),
+                Double.parseDouble(matcher.group(7)),
+                Double.parseDouble(matcher.group(8)),
+                Double.parseDouble(matcher.group(9)));
     }
 
     public static void main(String[] args) {
