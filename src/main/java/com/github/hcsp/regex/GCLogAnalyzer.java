@@ -31,7 +31,7 @@ public class GCLogAnalyzer {
                 InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
             String line;
-            while((line = bufferedReader.readLine())!= null) {
+            while ((line = bufferedReader.readLine()) != null) {
                 Matcher matcher = PRECOMPILED_PATTERN.matcher(line);
                 if (matcher.find()) {
                     gcActivities.add(constructGCActivity(matcher));
