@@ -1,7 +1,13 @@
 package com.github.hcsp.regex;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -17,7 +23,54 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        Pattern pattern1 = Pattern.compile("PSYoungGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\)[\\s\\S]+\\s(\\d+)K->(\\d+)K\\((\\d+)K\\)[\\s\\S]+" +
+                "user=([0-9]\\.[0-9]+)[\\s\\S]+sys=([0-9]\\.[0-9]+)[\\s\\S]+real=([0-9]\\.[0-9]+)");
+        List<GCActivity> result = new LinkedList<>();
+        String line;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(gcLog));
+            while ((line = reader.readLine()) != null) {
+                Matcher matcher1 = pattern1.matcher(line);
+                if (matcher1.find()) {
+                    newGCActivityAndAddItToList(result, matcher1);
+                }
+            }
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private static void newGCActivityAndAddItToList(List<GCActivity> result, Matcher matcher1) {
+        int youngGenAfter;
+        int heapBefore;
+        double sys;
+        double real;
+        int youngGenBefore;
+        int heapAfter;
+        double user;
+        int youngGenTotal;
+        int heapTotal;
+
+        youngGenBefore = Integer.parseInt(matcher1.group(1));
+
+        youngGenAfter = Integer.parseInt(matcher1.group(2));
+
+        youngGenTotal = Integer.parseInt(matcher1.group(3));
+
+        heapBefore = Integer.parseInt(matcher1.group(4));
+
+        heapAfter = Integer.parseInt(matcher1.group(5));
+
+        heapTotal = Integer.parseInt(matcher1.group(6));
+
+        user = Double.parseDouble(matcher1.group(7));
+
+        sys = Double.parseDouble(matcher1.group(8));
+
+        real = Double.parseDouble(matcher1.group(9));
+
+        result.add(new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real));
     }
 
     public static void main(String[] args) {
