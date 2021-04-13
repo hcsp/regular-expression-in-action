@@ -1,7 +1,7 @@
 package com.github.hcsp.regex;
 
 public class PhoneNumberMatcher {
-    private static final String phoneNumber = "0\\d{2}-[1-9]\\d{7}|0\\d{3}-[1-9]\\d{6}";
+    private static final String phoneNumber = "0\\d{2}-[1-9]\\d{7}|0\\d{3}-[1-9]\\d{6,7}";
 
     // 请编写一个函数，判断一个字符串是不是合法的固定电话号码
     // 合法的固定电话号码为：区号-号码
