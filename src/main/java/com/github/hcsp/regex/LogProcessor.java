@@ -14,13 +14,8 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
-    // Tips:
-    // Pattern.MULTILINE or (?m) tells Java to accept the anchors ^ and $
-    // to match at the start and end of each line
-    // (otherwise they only match at the start/end of the entire string)
     public static String process(String log) {
-        String regex = "(?m)^\\[\\d{4}([\\-0-9]{3}){2} .{8}\\] ";
-        return log.replaceAll(regex, "");
+        return null;
     }
 
     public static void main(String[] args) {
