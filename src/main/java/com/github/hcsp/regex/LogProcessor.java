@@ -14,8 +14,20 @@ public class LogProcessor {
     // bt3102 (11m:21s)
     // TeamCity server version is 2019.1.1 (build 66192)
     // Collecting changes in 2 VCS roots (22s)
+    private static final String REGEX = "(?m)^\\[.*?\\]";
+
+    /*
+     * 1、.*是贪婪匹配，第1个出现"["的地方，和最后一个出现"]"的地方
+     * 2、.*?是惰性匹配，第1个出现"["的地方，和跟着最近的出现"]"的地方
+     *
+     * 3、"(?m)^ +" 的意思是匹配以1个多多个空格开始字符
+     * 4、(?m) 在这种模式下，'^'和'$'分别匹配一行的开始和结束。
+     *   此外，'^'仍然匹配字符串的开始，'$'也匹配字符串的结束。
+     *   默认情况下，这两个表达式仅仅匹配字符串的开始和结束。
+     */
+
     public static String process(String log) {
-        return null;
+        return log.replaceAll(REGEX, "");
     }
 
     public static void main(String[] args) {
