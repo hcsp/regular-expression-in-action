@@ -1,18 +1,9 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class GCLogAnalyzer {
-    private static final String GC_LOG_REGEX = "(\\d+)K->(\\d+)K\\((\\d+)K\\).+?(\\d+)K->(\\d+)K\\((\\d+)K\\).+?" +
-        "user=(\\d\\.\\d+).*?sys=(\\d\\.\\d+).*?real=(\\d.\\d+)";
-    private static final Pattern GC_LOG_PATTERN = Pattern.compile(GC_LOG_REGEX);
-
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
@@ -25,29 +16,11 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) throws IOException {
-        List<String> lines = Files.readAllLines(gcLog.toPath());
-        return lines.stream()
-            .map(GC_LOG_PATTERN::matcher)
-            .filter(Matcher::find)
-            .map(GCLogAnalyzer::getGCActivity)
-            .collect(Collectors.toList());
+    public static List<GCActivity> parse(File gcLog) {
+        return null;
     }
 
-    private static GCActivity getGCActivity(Matcher matcher) {
-        return new GCActivity(Integer.parseInt(matcher.group(1)),
-            Integer.parseInt(matcher.group(2)),
-            Integer.parseInt(matcher.group(3)),
-            Integer.parseInt(matcher.group(4)),
-            Integer.parseInt(matcher.group(5)),
-            Integer.parseInt(matcher.group(6)),
-            Double.parseDouble(matcher.group(7)),
-            Double.parseDouble(matcher.group(8)),
-            Double.parseDouble(matcher.group(9))
-        );
-    }
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
@@ -73,15 +46,15 @@ public class GCLogAnalyzer {
         double real;
 
         public GCActivity(
-            int youngGenBefore,
-            int youngGenAfter,
-            int youngGenTotal,
-            int heapBefore,
-            int heapAfter,
-            int heapTotal,
-            double user,
-            double sys,
-            double real) {
+                int youngGenBefore,
+                int youngGenAfter,
+                int youngGenTotal,
+                int heapBefore,
+                int heapAfter,
+                int heapTotal,
+                double user,
+                double sys,
+                double real) {
             this.youngGenBefore = youngGenBefore;
             this.youngGenAfter = youngGenAfter;
             this.youngGenTotal = youngGenTotal;
@@ -96,25 +69,25 @@ public class GCLogAnalyzer {
         @Override
         public String toString() {
             return "GCActivity{"
-                + "youngGenBefore="
-                + youngGenBefore
-                + ", youngGenAfter="
-                + youngGenAfter
-                + ", youngGenTotal="
-                + youngGenTotal
-                + ", heapBefore="
-                + heapBefore
-                + ", heapAfter="
-                + heapAfter
-                + ", heapTotal="
-                + heapTotal
-                + ", user="
-                + user
-                + ", sys="
-                + sys
-                + ", real="
-                + real
-                + '}';
+                    + "youngGenBefore="
+                    + youngGenBefore
+                    + ", youngGenAfter="
+                    + youngGenAfter
+                    + ", youngGenTotal="
+                    + youngGenTotal
+                    + ", heapBefore="
+                    + heapBefore
+                    + ", heapAfter="
+                    + heapAfter
+                    + ", heapTotal="
+                    + heapTotal
+                    + ", user="
+                    + user
+                    + ", sys="
+                    + sys
+                    + ", real="
+                    + real
+                    + '}';
         }
 
         public int getYoungGenBefore() {
