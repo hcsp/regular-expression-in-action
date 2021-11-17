@@ -1,17 +1,9 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
-    //    static final Pattern comlie = Pattern.compile("(\\d+)K->(\\d+)K\\((\\d+)K\\)\\]\\s(\\d+)K->(\\d+)K\\((\\d+)K\\),\\s(\\d\\.\\d+)\\s\\w+\\]\\s\\[\\w+:\\suser=(\\d\\.\\d+)\\ssys=(\\d\\.\\d+),\\sreal=(\\d\\.\\d+)\\ssecs\\]");
-    static final Pattern comlie = Pattern.compile("(\\d+)K->(\\d+)K\\((\\d+)K\\).+?(\\d+)K->(\\d+)K\\((\\d+)K\\).*?user=(\\d\\.\\d+)\\ssys=(\\d\\.\\d+),\\sreal=(\\d\\.\\d+)");
-
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
     // 请从中提取GC活动的信息，每行提取出一个GCActivity对象
     //
@@ -25,29 +17,7 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        ArrayList<GCActivity> gcActivities = new ArrayList<>();
-        try {
-            List<String> strings = Files.readAllLines(gcLog.toPath());
-            for (String string : strings) {
-                Matcher matcher = comlie.matcher(string);
-                while (matcher.find()) {
-                    int youngGenBefore = Integer.parseInt(matcher.group(1));
-                    int youngGenAfter = Integer.parseInt(matcher.group(2));
-                    int youngGenTotal = Integer.parseInt(matcher.group(3));
-                    int heapBefore = Integer.parseInt(matcher.group(4));
-                    int heapAfter = Integer.parseInt(matcher.group(5));
-                    int heapTotal = Integer.parseInt(matcher.group(6));
-                    double user = Double.parseDouble(matcher.group(7));
-                    double sys = Double.parseDouble(matcher.group(8));
-                    double real = Double.parseDouble(matcher.group(9));
-                    GCActivity gcActivity = new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real);
-                    gcActivities.add(gcActivity);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return gcActivities;
+        return null;
     }
 
     public static void main(String[] args) {
