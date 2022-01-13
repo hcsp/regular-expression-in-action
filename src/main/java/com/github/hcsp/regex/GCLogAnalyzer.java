@@ -1,7 +1,12 @@
 package com.github.hcsp.regex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,11 +21,32 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
-    public static List<GCActivity> parse(File gcLog) {
-        return null;
+    public static List<GCActivity> parse(File gcLog) throws IOException {
+        List<GCActivity> finalList = new ArrayList<>();
+        Pattern patternPart1 = Pattern
+                .compile("gGen:\\s(\\d+)K->(\\d+)K\\((\\d+)K\\)]\\s?.*\\s(\\d+)K->(\\d+)K\\((\\d+)K\\),.+=(\\d\\.\\d{2}).+(\\d\\.\\d{2}).+(\\d\\.\\d{2})");
+        List<String> lines = Files.readAllLines(new File("gc.log").toPath());
+        for (String line : lines) {
+            System.out.println("-----------");
+            Matcher matcherPart1 = patternPart1.matcher(line);
+            while (matcherPart1.find()) {
+                finalList.add(new GCActivity(
+                        Integer.parseInt(matcherPart1.group(1)),
+                        Integer.parseInt(matcherPart1.group(2)),
+                        Integer.parseInt(matcherPart1.group(3)),
+                        Integer.parseInt(matcherPart1.group(4)),
+                        Integer.parseInt(matcherPart1.group(5)),
+                        Integer.parseInt(matcherPart1.group(6)),
+                        Double.parseDouble(matcherPart1.group(7)),
+                        Double.parseDouble(matcherPart1.group(8)),
+                        Double.parseDouble(matcherPart1.group(9))));
+            }
+        }
+
+        return finalList;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<GCActivity> activities = parse(new File("gc.log"));
         activities.forEach(System.out::println);
     }
