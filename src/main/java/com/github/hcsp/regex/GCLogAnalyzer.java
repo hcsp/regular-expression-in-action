@@ -1,7 +1,12 @@
 package com.github.hcsp.regex;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -16,8 +21,43 @@ public class GCLogAnalyzer {
     // user=0.02 sys=0.00, real=0.01 分别代表用户态消耗的时间、系统调用消耗的时间和物理世界真实流逝的时间
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
+
+
     public static List<GCActivity> parse(File gcLog) {
-        return null;
+        List<GCActivity> gcActivities = new ArrayList<>();
+        Pattern r = Pattern.compile("PSYoungGen: (\\d*)K->(\\d*)K\\((\\d*)|] (\\d*)K->(\\d*)K\\((\\d*)|w*=([\\d.]*)[ ,]\\w*=([\\d.]*), \\w*=([\\d.]*)");
+
+        // 现在创建 matcher 对象
+        Matcher m;
+        try {
+            // create a reader instance
+            BufferedReader br = new BufferedReader(new FileReader(gcLog));
+            // read until end of file
+            String line;
+            while ((line = br.readLine()) != null) {
+                m = r.matcher(line);
+                if (m.find()) {
+                    int youngGenBefore = Integer.parseInt(m.group(1));
+                    int youngGenAfter = Integer.parseInt(m.group(2));
+                    int youngGenTotal = Integer.parseInt(m.group(3));
+                    m.find();
+                    int heapBefore = Integer.parseInt(m.group(4));
+                    int heapAfter = Integer.parseInt(m.group(5));
+                    int heapTotal = Integer.parseInt(m.group(6));
+                    m.find();
+                    double user = Double.parseDouble(m.group(7));
+                    double sys = Double.parseDouble(m.group(8));
+                    double real = Double.parseDouble(m.group(9));
+                    GCActivity gcActivity = new GCActivity(youngGenBefore, youngGenAfter, youngGenTotal, heapBefore, heapAfter, heapTotal, user, sys, real);
+                    gcActivities.add(gcActivity);
+                }
+            }
+            // close the reader
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return gcActivities;
     }
 
     public static void main(String[] args) {
