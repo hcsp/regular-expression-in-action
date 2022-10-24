@@ -23,7 +23,7 @@ public class PhoneNumberMatcher {
         if (mather.find()) {
             System.out.println("Found Value:" + mather.group(0));
             System.out.println("Found Value:" + mather.group(1));
-            if(mather.group(1).length() == 3){
+            if (mather.group(1).length() == 3) {
                 return mather.group(2).length() == 8;
             } else {
                 return true;
