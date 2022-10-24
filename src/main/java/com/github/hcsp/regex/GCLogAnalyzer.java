@@ -23,7 +23,8 @@ public class GCLogAnalyzer {
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
 //        Pattern pattern = Pattern.compile("(\\d*)K->(\\d*)K\\((\\d*)K\\).*\\s(\\d*)K->(\\d*)K\\((\\d*)K\\).*(\\d.\\d*).*(\\d.\\d*).*(\\d.\\d*).*");
-        Pattern pattern = Pattern.compile(".*(\\d*)K->(\\d*)K\\((\\d*)K\\).*(\\d*)K->(\\d*)K\\((\\d*)K\\),|[\\],]\\s(\\d\\.\\d*).*(\\d\\.\\d*).*(\\d\\.\\d*)");
+//        Pattern pattern = Pattern.compile("\\[PSYoungGen:\\s(\\d*)K->(\\d*)K\\((\\d*)K\\).*(\\d*)K->(\\d*)K\\((\\d*)K\\),|[\\],]\\s(\\d\\.\\d*).*(\\d\\.\\d*).*(\\d\\.\\d*)");
+        Pattern pattern = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\).*]\\s(\\d+)K->(\\d+)K\\((\\d+)K\\).*user=(\\d.\\d+) sys=(\\d.\\d+), real=(\\d.\\d+)");
         List<GCActivity> list = new ArrayList<>();
         try {
             List<String> lines = Files.readAllLines(gcLog.toPath());
@@ -31,6 +32,7 @@ public class GCLogAnalyzer {
                 Matcher matcher = pattern.matcher(line);
                 while (matcher.find()) {
                     GCActivity gcActivity = new GCActivity(
+
                             Integer.parseInt(matcher.group(1)),
                             Integer.parseInt(matcher.group(2)),
                             Integer.parseInt(matcher.group(3)),
