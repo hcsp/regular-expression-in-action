@@ -23,7 +23,7 @@ public class GCLogAnalyzer {
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
 //        Pattern pattern = Pattern.compile("(\\d*)K->(\\d*)K\\((\\d*)K\\).*\\s(\\d*)K->(\\d*)K\\((\\d*)K\\).*(\\d.\\d*).*(\\d.\\d*).*(\\d.\\d*).*");
-        Pattern pattern = Pattern.compile("\\[PSYoungGen:\\s(\\d*)K->(\\d*)K\\((\\d*)K\\).*(\\d*)K->(\\d*)K\\((\\d*)K\\).*(\\d.\\d*).*(\\d.\\d*).*(\\d.\\d*).*");
+        Pattern pattern = Pattern.compile(".*(\\d*)K->(\\d*)K\\((\\d*)K\\).*(\\d*)K->(\\d*)K\\((\\d*)K\\),|[\\],]\\s(\\d\\.\\d*).*(\\d\\.\\d*).*(\\d\\.\\d*)");
         List<GCActivity> list = new ArrayList<>();
         try {
             List<String> lines = Files.readAllLines(gcLog.toPath());
@@ -41,6 +41,7 @@ public class GCLogAnalyzer {
                             Double.parseDouble(matcher.group(8)),
                             Double.parseDouble(matcher.group(9))
                     );
+                    System.out.println(matcher.group(6));
                     list.add(gcActivity);
                 }
             }
