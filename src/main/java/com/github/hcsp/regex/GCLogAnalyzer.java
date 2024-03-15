@@ -1,11 +1,7 @@
 package com.github.hcsp.regex;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.File;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GCLogAnalyzer {
     // 在本项目的根目录下有一个gc.log文件，是JVM的GC日志
@@ -21,48 +17,6 @@ public class GCLogAnalyzer {
     // 请将这些信息解析成一个GCActivity类的实例
     // 如果某行中不包含这些数据，请直接忽略该行
     public static List<GCActivity> parse(File gcLog) {
-        Pattern ygPattern = Pattern.compile("\\[PSYoungGen: (\\d+)K->(\\d+)K\\((\\d+)K\\)\\]");
-        Pattern jvmPattern = Pattern.compile("(\\d+)K->(\\d+)K\\((\\d+)K\\),");
-        Pattern timePattern = Pattern.compile("user=(\\d+.\\d+) sys=(\\d+.\\d+), real=(\\d+.\\d+)");
-        List<GCActivity> result = new ArrayList<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(gcLog))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                List<String> extractYg = extract(ygPattern, line);
-                List<String> extractJvm = extract(jvmPattern, line);
-                List<String> extractTime = extract(timePattern, line);
-                if (extractYg != null) {
-                    result.add(composeTogether(extractYg, extractJvm, extractTime));
-                }
-            }
-            return result;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static GCActivity composeTogether(List<String> extractYg, List<String> extractJvm, List<String> extractTime) {
-        return new GCActivity(
-                Integer.parseInt(extractYg.get(0)),
-                Integer.parseInt(extractYg.get(1)),
-                Integer.parseInt(extractYg.get(2)),
-                Integer.parseInt(extractJvm.get(0)),
-                Integer.parseInt(extractJvm.get(1)),
-                Integer.parseInt(extractJvm.get(2)),
-                Double.parseDouble(extractTime.get(0)),
-                Double.parseDouble(extractTime.get(1)),
-                Double.parseDouble(extractTime.get(2))
-        );
-    }
-
-    private static List<String> extract(Pattern pattern, String line) {
-        Matcher matcher = pattern.matcher(line);
-        if (matcher.find()) {
-            String group1 = matcher.group(1);
-            String group2 = matcher.group(2);
-            String group3 = matcher.group(3);
-            return Arrays.asList(group1, group2, group3);
-        }
         return null;
     }
 
